@@ -1,3 +1,6 @@
+@if (loading()) {
+  <app-over-content-spinner [spinning]="loading()"></app-over-content-spinner>
+}
 <div class="container">
   <div class="actions">
     <button matButton="filled" (click)="onGenerate()">Generate new GUID</button>

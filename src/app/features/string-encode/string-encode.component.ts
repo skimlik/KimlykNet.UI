@@ -8,6 +8,8 @@ import { HttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { catchError } from 'rxjs';
+import { OverContentSpinner } from '@core/components';
 
 @Component({
   selector: 'app-string-encoder',
@@ -21,11 +23,13 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatAnchor,
     MatButtonModule,
     MatIconModule,
+    OverContentSpinner,
   ],
 })
 export class StringEncoderComponent {
   protected readonly text: string | undefined = undefined;
   protected readonly result = signal<string | undefined>(undefined);
+  protected readonly loading = signal<boolean>(false);
 
   private apiBase = inject(API_URL);
   private http = inject(HttpClient);
@@ -33,19 +37,33 @@ export class StringEncoderComponent {
   private snackBar = inject(MatSnackBar);
 
   onEncode(): void {
+    this.loading.set(true);
     this.http
       .post<{ converted: string }>(`${this.apiBase}/api/base64/to`, {
         inputText: this.text,
       })
-      .subscribe(({ converted }) => this.result.set(converted));
+      .subscribe({
+        next: (value) => {
+          this.result.set(value.converted);
+          this.loading.set(false);
+        },
+        error: (_) => this.loading.set(false),
+      });
   }
 
   onDecode(): void {
+    this.loading.set(true);
     this.http
       .post<{ converted: string }>(`${this.apiBase}/api/base64/from`, {
         inputText: this.text,
       })
-      .subscribe(({ converted }) => this.result.set(converted));
+      .subscribe({
+        next: (value) => {
+          this.result.set(value.converted);
+          this.loading.set(false);
+        },
+        error: (_) => this.loading.set(false),
+      });
   }
 
   onCopy(): void {
