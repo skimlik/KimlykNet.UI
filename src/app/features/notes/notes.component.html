@@ -1,0 +1,47 @@
+@if (loading()) {
+  <app-over-content-spinner [spinning]="loading()"></app-over-content-spinner>
+}
+<div class="notes-container">
+  <div class="header">
+    <h1 class="title">My Notes</h1>
+    <button matButton="filled" (click)="createNote()" class="create-button">
+      <mat-icon>add</mat-icon>
+      Create New Note
+    </button>
+  </div>
+
+  <div class="notes-grid">
+    @for (note of notes(); track note.noteId) {
+      <mat-card class="note-card" appearance="outlined">
+        <mat-card-header>
+          <mat-card-title>{{ note.title }}</mat-card-title>
+          <mat-card-subtitle>
+            {{ note.modifiedDate | date: 'short' }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="note-text" markdown [data]="note.text"></div>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button matIconButton (click)="editNote(note)" aria-label="Edit note">
+            <mat-icon>edit</mat-icon>
+          </button>
+          @if (note.isPublic) {
+            <button matIconButton (click)="shareNote(note)" aria-label="Share note">
+              <mat-icon>share</mat-icon>
+            </button>
+          }
+          <button matIconButton (click)="deleteNote(note)" aria-label="Delete note" color="warn">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    } @empty {
+      <div class="empty-state">
+        <mat-icon class="empty-icon">note_add</mat-icon>
+        <h2>No notes yet</h2>
+        <p>Create your first note to get started!</p>
+      </div>
+    }
+  </div>
+</div>

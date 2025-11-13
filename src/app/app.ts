@@ -143,4 +143,8 @@ export class App implements OnDestroy {
   protected onLogOff(): void {
     this.auth.logOff();
   }
+
+  protected onNotesClicked(): void {
+    this._router.navigate(['notes']);
+  }
 }

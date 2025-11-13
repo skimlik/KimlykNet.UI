@@ -36,6 +36,10 @@
       <mat-icon style="color: var(--mat-sys-primary)">person</mat-icon>
     </button>
     <mat-menu #userMenu="matMenu">
+      <button mat-menu-item (click)="onNotesClicked()">
+        <mat-icon>file_open</mat-icon>
+        <span>User notes</span>
+      </button>
       <button mat-menu-item (click)="onLogOff()">
         <mat-icon>logout</mat-icon>
         <span>Log Off</span>

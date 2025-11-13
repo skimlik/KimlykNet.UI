@@ -42,6 +42,10 @@ export class AuthService {
       });
   }
 
+  get token(): string | null {
+    return this.defaultView.localStorage.getItem('auth_token');
+  }
+
   logOff(): void {
     this.defaultView.localStorage.removeItem('auth_token');
     this.defaultView.localStorage.removeItem('auth_token_expiration');

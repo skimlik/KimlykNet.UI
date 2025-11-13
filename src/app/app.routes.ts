@@ -40,4 +40,8 @@ export const routes: Routes = [
       import('./features/currency-rates/nbu/nbu-rates.component').then((m) => m.NbuRatesComponent),
     title: 'NBU Rates - Base currency UAH',
   },
+  {
+    path: 'notes',
+    loadComponent: () => import('./features/notes/notes.component').then((m) => m.NotesComponent),
+  },
 ];
