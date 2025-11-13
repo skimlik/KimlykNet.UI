@@ -1,0 +1,14 @@
+<div class="container">
+  <div class="actions">
+    <button matButton="filled" (click)="onGenerate()">Generate new GUID</button>
+    <button matButton="filled" (click)="onClear()">Clear</button>
+  </div>
+  <p></p>
+  <div class="data-grid">
+    @for (item of guids(); track $index) {
+      <div class="data-row">
+        <div class="data-cell">{{ item }}</div>
+      </div>
+    }
+  </div>
+</div>

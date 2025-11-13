@@ -1,0 +1,25 @@
+<div class="container">
+  <form class="guid-generator-form">
+    <mat-form-field class="string-input">
+      <mat-label>Enter your string value</mat-label>
+      <textarea
+        name="source-value"
+        matInput
+        placeholder="Raw string or Base64 string"
+        [(ngModel)]="text"
+      ></textarea>
+    </mat-form-field>
+    <div class="actions">
+      <button matButton="filled" [disabled]="!text" (click)="onEncode()">Encode</button>
+      <button matButton="filled" [disabled]="!text" (click)="onDecode()">Decode</button>
+    </div>
+  </form>
+  @if (result(); as res) {
+    <button matIconButton aria-label="Copy text" (click)="onCopy()">
+      <mat-icon>content_copy</mat-icon>
+    </button>
+    <div class="result">
+      {{ res }}
+    </div>
+  }
+</div>

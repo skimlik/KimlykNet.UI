@@ -1,0 +1,11 @@
+.container {
+  position: relative;
+  margin: 1em 2em;
+
+  .actions {
+    position: relative;
+    display: flex;
+    gap: 0.6em;
+    flex-wrap: nowrap;
+  }
+}

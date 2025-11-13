@@ -1,0 +1,19 @@
+.container {
+  position: relative;
+  margin: 1em 2em;
+
+  .guid-generator-form {
+    position: relative;
+    width: 100%;
+
+    .string-input {
+      width: 100%;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.6em;
+    }
+  }
+}
