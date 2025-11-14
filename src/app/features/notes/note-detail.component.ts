@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal, afterNextRender } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -7,7 +7,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MarkdownModule } from 'ngx-markdown';
-import hljs from 'highlight.js';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { API_URL } from 'src/app/app.config';
 import { AuthService } from '@core/index';
@@ -15,7 +14,6 @@ import { OverContentSpinner } from '@core/components';
 import { Note, NoteBase } from './note.model';
 import { NoteDialogComponent } from './note-dialog.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-note-detail',
@@ -216,13 +214,6 @@ export class NoteDetailComponent implements OnInit {
   protected loading = signal(false);
   protected note = signal<Note | null>(null);
 
-  constructor() {
-    // Use afterNextRender to ensure DOM is ready for syntax highlighting
-    afterNextRender(() => {
-      this.highlightCode();
-    });
-  }
-
   ngOnInit(): void {
     // Get canEdit from navigation state
     const state = history.state as { canEdit?: boolean };
@@ -232,12 +223,6 @@ export class NoteDetailComponent implements OnInit {
     if (noteId) {
       this.loadNote(noteId);
     }
-  }
-
-  private highlightCode(): void {
-    document.querySelectorAll('pre code:not(.hljs)').forEach((block) => {
-      hljs.highlightElement(block as HTMLElement);
-    });
   }
 
   private loadNote(noteId: string): void {

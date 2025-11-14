@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal, afterNextRender } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -7,12 +7,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MarkdownModule } from 'ngx-markdown';
-import hljs from 'highlight.js';
 import { Note, NoteBase } from './note.model';
 import { NoteDialogComponent } from './note-dialog.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { API_URL } from 'src/app/app.config';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '@core/index';
 import { OverContentSpinner } from '@core/components';
 import { NavService, SideNavItem } from '@core/nav';
@@ -43,13 +42,6 @@ export class NotesComponent implements OnInit {
   protected loading = signal(false);
 
   private allNotes = signal<Note[]>([]);
-
-  constructor() {
-    // Use afterNextRender to ensure DOM is ready for syntax highlighting
-    afterNextRender(() => {
-      this.highlightCode();
-    });
-  }
 
   ngOnInit(): void {
     this.refresh();
@@ -88,13 +80,6 @@ export class NotesComponent implements OnInit {
 
   private dialog = inject(MatDialog);
   private snackBar = inject(MatSnackBar);
-
-  private highlightCode(): void {
-    // Apply syntax highlighting to all code blocks that haven't been highlighted yet
-    document.querySelectorAll('pre code:not(.hljs)').forEach((block) => {
-      hljs.highlightElement(block as HTMLElement);
-    });
-  }
 
   createNote(): void {
     const dialogRef = this.dialog.open(NoteDialogComponent, {
