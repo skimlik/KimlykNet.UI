@@ -43,5 +43,12 @@ export const routes: Routes = [
   {
     path: 'notes',
     loadComponent: () => import('./features/notes/notes.component').then((m) => m.NotesComponent),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'notes/:noteId',
+    loadComponent: () =>
+      import('./features/notes/note-detail.component').then((m) => m.NoteDetailComponent),
+    data: { canEdit: false },
   },
 ];

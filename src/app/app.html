@@ -13,7 +13,11 @@
     [matRippleRadius]="12"
     matRippleColor="var(--mat-sys-inverse-primary)"
   >
-    <span class="app-title" routerLink="/">Kimlyk Home</span>
+    @if (isMobile()) {
+      <mat-icon class="app-title" routerLink="/">home</mat-icon>
+    } @else {
+      <span class="app-title" routerLink="/">Kimlyk Home</span>
+    }
   </div>
   @for (item of menu(); track $index) {
     <button
@@ -65,10 +69,17 @@
     class="main-menu-slide-over"
   >
     <div class="side-nav-items">
-      @for (item of currentSection()?.sideNavItems; track $index) {
+      @for (item of navItems.navItems(); track $index) {
         @if (auth.authenticated() || !item.publiclyInvisible) {
           @if (item.type === 'button') {
-            <button matButton class="menu-button" (click)="item?.action(item)">
+            <button
+              [matButton]="item.style || 'text'"
+              class="menu-button"
+              (click)="item?.action(item)"
+            >
+              @if (item.iconName) {
+                <mat-icon>{{ item.iconName }}</mat-icon>
+              }
               {{ item.title }}
             </button>
           }

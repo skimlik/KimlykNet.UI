@@ -8,7 +8,6 @@ import { HttpClient } from '@angular/common/http';
 import { MatIconModule } from '@angular/material/icon';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { catchError } from 'rxjs';
 import { OverContentSpinner } from '@core/components';
 
 @Component({

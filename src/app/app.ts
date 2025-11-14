@@ -11,22 +11,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { MediaMatcher } from '@angular/cdk/layout';
 import { MatRippleModule } from '@angular/material/core';
-
-export interface SideNavItem {
-  name?: string;
-  title?: string;
-  action?: (item: SideNavItem) => void;
-  publiclyInvisible?: boolean;
-  type: 'button' | 'divider' | 'text';
-}
-
-export interface MenuItem {
-  name: string;
-  title: string;
-  icon?: string;
-  publiclyInvisible?: boolean;
-  sideNavItems: SideNavItem[];
-}
+import { MenuItem, NavService, SideNavItem } from '@core/nav';
 
 @Component({
   selector: 'app-root',
@@ -52,12 +37,10 @@ export class App implements OnDestroy {
   private readonly _mobileQuery: MediaQueryList;
   private readonly _mobileQueryListener: () => void;
 
+  protected readonly navItems = inject(NavService);
   protected readonly isMobile = signal(false);
   protected readonly auth = inject(AuthService);
   protected readonly currentSectionName = signal<string>('utils');
-  protected readonly currentSection = computed(() =>
-    this.menu().find((m) => m.name === this.currentSectionName()),
-  );
 
   protected readonly menu = signal<MenuItem[]>([
     {
@@ -68,6 +51,7 @@ export class App implements OnDestroy {
           name: 'currency_rates_nbu',
           title: 'Currency Rates (NBU)',
           type: 'button',
+          iconName: 'currency_exchange',
           action: () => {
             this._router.navigate(['rates', 'nbu']);
             this._sidenav().close();
@@ -83,6 +67,7 @@ export class App implements OnDestroy {
           name: 'guid_generator',
           title: 'Guid Generator',
           type: 'button',
+          iconName: 'grid_3x3',
           action: () => {
             this._router.navigate(['guid']);
             this._sidenav().close();
@@ -92,6 +77,7 @@ export class App implements OnDestroy {
           name: 'String Base 64',
           title: 'String Base 64',
           type: 'button',
+          iconName: 'convert_to_text',
           action: () => {
             this._router.navigate(['string-encode']);
             this._sidenav().close();
@@ -104,6 +90,7 @@ export class App implements OnDestroy {
           name: 'data_protection',
           title: 'Data Protection',
           publiclyInvisible: true,
+          iconName: 'encrypted',
           type: 'button',
           action: () => {
             this._router.navigate(['data-protection']);
@@ -121,6 +108,12 @@ export class App implements OnDestroy {
     this.isMobile.set(this._mobileQuery.matches);
     this._mobileQueryListener = () => this.isMobile.set(this._mobileQuery.matches);
     this._mobileQuery.addEventListener('change', this._mobileQueryListener);
+
+    effect(() => {
+      const section = this.currentSectionName();
+      const menu = this.menu().find((m) => m.name === section);
+      this.navItems.update(menu?.sideNavItems ?? []);
+    });
   }
 
   ngOnDestroy(): void {

@@ -22,7 +22,7 @@ export class GuidGeneratorComponent {
   onGenerate(): void {
     this.loading.set(true);
     const guids = this.guids();
-    const guid$ = this.httpClient
+    this.httpClient
       .get<string>(`${this.apiBase}/api/guid`)
       .pipe(
         catchError(() => {

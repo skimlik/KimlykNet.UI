@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DOCUMENT, inject, Injectable, signal } from '@angular/core';
 import { AuthToken } from './auth-token';
 import { API_URL } from 'src/app/app.config';
@@ -40,6 +40,14 @@ export class AuthService {
           this.defaultView.localStorage.setItem('auth_token_expiration', token.expiration);
         }
       });
+  }
+
+  get authHeader(): HttpHeaders {
+    const token = this.token;
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return headers;
   }
 
   get token(): string | null {

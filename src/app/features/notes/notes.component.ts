@@ -1,5 +1,6 @@
-import { Component, computed, inject, OnInit, signal, AfterViewChecked } from '@angular/core';
+import { Component, computed, inject, OnInit, signal, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,6 +15,7 @@ import { API_URL } from 'src/app/app.config';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '@core/index';
 import { OverContentSpinner } from '@core/components';
+import { NavService, SideNavItem } from '@core/nav';
 
 @Component({
   selector: 'app-notes',
@@ -31,31 +33,42 @@ import { OverContentSpinner } from '@core/components';
   templateUrl: './notes.component.html',
   styleUrl: './notes.component.scss',
 })
-export class NotesComponent implements OnInit, AfterViewChecked {
+export class NotesComponent implements OnInit {
   private readonly apiBase = inject(API_URL);
   private readonly auth = inject(AuthService);
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly navItems = inject(NavService);
 
   protected loading = signal(false);
 
   private allNotes = signal<Note[]>([]);
 
-  ngOnInit(): void {
-    this.refresh();
+  constructor() {
+    // Use afterNextRender to ensure DOM is ready for syntax highlighting
+    afterNextRender(() => {
+      this.highlightCode();
+    });
   }
 
-  ngAfterViewChecked(): void {
-    // Apply syntax highlighting to all code blocks that haven't been highlighted yet
-    document.querySelectorAll('pre code:not(.hljs)').forEach((block) => {
-      hljs.highlightElement(block as HTMLElement);
-    });
+  ngOnInit(): void {
+    this.refresh();
+    this.navItems.update([
+      {
+        name: 'create_section',
+        title: 'Create section',
+        type: 'button',
+        style: 'filled',
+        iconName: 'docs_add_on',
+      } as SideNavItem,
+    ]);
   }
 
   protected refresh(): void {
     this.loading.set(true);
     this.allNotes.set([]);
 
-    const headers = this.authHeader;
+    const headers = this.auth.authHeader;
     this.http.get<Note[]>(`${this.apiBase}/api/usernotes`, { headers }).subscribe({
       next: (value) => {
         this.loading.set(false);
@@ -73,10 +86,15 @@ export class NotesComponent implements OnInit, AfterViewChecked {
     ),
   );
 
-  constructor(
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-  ) {}
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
+
+  private highlightCode(): void {
+    // Apply syntax highlighting to all code blocks that haven't been highlighted yet
+    document.querySelectorAll('pre code:not(.hljs)').forEach((block) => {
+      hljs.highlightElement(block as HTMLElement);
+    });
+  }
 
   createNote(): void {
     const dialogRef = this.dialog.open(NoteDialogComponent, {
@@ -92,7 +110,7 @@ export class NotesComponent implements OnInit, AfterViewChecked {
           isPublic: result.isPublic,
         };
         this.loading.set(true);
-        const headers = this.authHeader;
+        const headers = this.auth.authHeader;
         this.http.post<Note>(`${this.apiBase}/api/usernotes`, newNote, { headers }).subscribe({
           next: (value) => {
             this.allNotes.update((notes) => [...notes, value]);
@@ -120,7 +138,7 @@ export class NotesComponent implements OnInit, AfterViewChecked {
         };
 
         this.loading.set(true);
-        const headers = this.authHeader;
+        const headers = this.auth.authHeader;
         this.http
           .put<Note>(`${this.apiBase}/api/usernotes/${note.noteId}`, update, { headers })
           .subscribe({
@@ -173,7 +191,7 @@ export class NotesComponent implements OnInit, AfterViewChecked {
 
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
-        const headers = this.authHeader;
+        const headers = this.auth.authHeader;
         this.http
           .delete(`${this.apiBase}/api/usernotes/${note.noteId}`, { headers })
           .subscribe(() => {
@@ -190,11 +208,9 @@ export class NotesComponent implements OnInit, AfterViewChecked {
     });
   }
 
-  private get authHeader(): HttpHeaders {
-    const token = this.auth.token;
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
+  openNote(note: Note): void {
+    this.router.navigate(['/notes', note.noteId], {
+      state: { canEdit: true },
     });
-    return headers;
   }
 }
