@@ -51,4 +51,9 @@ export const routes: Routes = [
       import('./features/notes/note-detail.component').then((m) => m.NoteDetailComponent),
     data: { canEdit: false },
   },
+  {
+    path: 'secrets',
+    loadComponent: () =>
+      import('./features/secrets/secret-manager.component').then((m) => m.SecretManagerComponent),
+  },
 ];

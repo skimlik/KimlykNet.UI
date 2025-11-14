@@ -97,6 +97,17 @@ export class App implements OnDestroy {
             this._sidenav().close();
           },
         },
+        {
+          name: 'secret_manager',
+          title: 'Create secret message',
+          publiclyInvisible: true,
+          iconName: 'key',
+          type: 'button',
+          action: () => {
+            this._router.navigate(['secrets']);
+            this._sidenav().close();
+          },
+        },
       ],
     },
   ]);
