@@ -56,4 +56,9 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/secrets/secret-manager.component').then((m) => m.SecretManagerComponent),
   },
+  {
+    path: 'secrets/:messageId',
+    loadComponent: () =>
+      import('./features/secrets/secret-viewer.component').then((m) => m.SecretViewerComponent),
+  },
 ];
