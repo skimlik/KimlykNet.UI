@@ -38,6 +38,8 @@ export class NotesComponent implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly navItems = inject(NavService);
+  private dialog = inject(MatDialog);
+  private snackBar = inject(MatSnackBar);
 
   protected loading = signal(false);
 
@@ -66,7 +68,7 @@ export class NotesComponent implements OnInit {
         this.loading.set(false);
         this.allNotes.set(value);
       },
-      error: (_) => this.loading.set(false),
+      error: (_) => this.showError(),
       complete: () => this.loading.set(false),
     });
   }
@@ -77,9 +79,6 @@ export class NotesComponent implements OnInit {
       (a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime(),
     ),
   );
-
-  private dialog = inject(MatDialog);
-  private snackBar = inject(MatSnackBar);
 
   createNote(): void {
     const dialogRef = this.dialog.open(NoteDialogComponent, {
@@ -102,7 +101,7 @@ export class NotesComponent implements OnInit {
             this.loading.set(false);
             this.snackBar.open('Note created!', 'Close', { duration: 2000 });
           },
-          error: () => this.loading.set(false),
+          error: () => this.showError(),
         });
       }
     });
@@ -145,7 +144,7 @@ export class NotesComponent implements OnInit {
               this.loading.set(false);
               this.snackBar.open('Note updated!', 'Close', { duration: 2000 });
             },
-            error: () => this.loading.set(false),
+            error: () => this.showError(),
           });
       }
     });
@@ -177,25 +176,33 @@ export class NotesComponent implements OnInit {
     dialogRef.afterClosed().subscribe((confirmed) => {
       if (confirmed) {
         const headers = this.auth.authHeader;
-        this.http
-          .delete(`${this.apiBase}/api/usernotes/${note.noteId}`, { headers })
-          .subscribe(() => {
+        this.http.delete(`${this.apiBase}/api/usernotes/${note.noteId}`, { headers }).subscribe({
+          next: () => {
             this.allNotes.update((notes) => notes.filter((n) => n.noteId !== note.noteId));
             this.snackBar.open('Note deleted!', 'Close', { duration: 2000 });
-          });
+          },
+          error: () => this.showError(),
+        });
       }
-    });
-  }
-
-  private copyToClipboard(text: string): void {
-    navigator.clipboard.writeText(text).then(() => {
-      this.snackBar.open('Note copied to clipboard!', 'Close', { duration: 2000 });
     });
   }
 
   openNote(note: Note): void {
     this.router.navigate(['/notes', note.noteId], {
       state: { canEdit: true },
+    });
+  }
+
+  private showError(): void {
+    this.loading.set(false);
+    this.snackBar.open('Error connecting to the server, please comeback later.', 'Close', {
+      duration: 2000,
+    });
+  }
+
+  private copyToClipboard(text: string): void {
+    navigator.clipboard.writeText(text).then(() => {
+      this.snackBar.open('Note copied to clipboard!', 'Close', { duration: 2000 });
     });
   }
 }
