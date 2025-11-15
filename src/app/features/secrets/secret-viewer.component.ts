@@ -1,10 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
-import { AuthService } from '@core/index';
-import { filter, map, mergeMap, Subject } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { API_URL } from 'src/app/app.config';
 
 @Component({
@@ -16,11 +14,10 @@ import { API_URL } from 'src/app/app.config';
 export class SecretViewerComponent implements OnInit {
   private _http = inject(HttpClient);
   private _apiBase = inject(API_URL);
-  private _auth = inject(AuthService);
   private _route = inject(ActivatedRoute);
 
   protected loading = signal<boolean>(false);
-  protected message = signal<string | undefined>(undefined);
+  protected message = signal<string | undefined | null>(undefined);
 
   constructor(private meta: Meta) {
     this.meta.addTags([
@@ -57,33 +54,28 @@ export class SecretViewerComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading.set(true);
-    const id$ = this._route.paramMap.pipe(
-      takeUntilDestroyed(),
-      map((pm) => {
-        var id = pm.get('messageId');
-        return id;
-      }),
-      filter((pmId) => !!pmId),
-    );
 
-    id$
+    this._route.paramMap
       .pipe(
-        mergeMap((id) => {
-          return this._http.get<{ secret: string }>(`${this._apiBase}/api/secret/${id}`);
-        }),
+        map((pm) => pm.get('messageId')),
+        filter((pmId) => !!pmId),
       )
       .subscribe({
-        next: (data) => {
-          this.loading.set(false);
-          this.message.set(data.secret);
-        },
-        error: (err) => {
-          this.loading.set(false);
-          if (err.status === 404) {
-            this.message.set('This message does not exist anymore');
-          } else {
-            this.message.set('Server currently unavailable, please comeback later.');
-          }
+        next: (id) => {
+          this._http.get<{ secret: string }>(`${this._apiBase}/api/secret/${id}`).subscribe({
+            next: (data) => {
+              this.loading.set(false);
+              this.message.set(data.secret);
+            },
+            error: (err) => {
+              this.loading.set(false);
+              if (err.status === 404) {
+                this.message.set('This message does not exist anymore');
+              } else {
+                this.message.set('Server currently unavailable, please comeback later.');
+              }
+            },
+          });
         },
       });
   }

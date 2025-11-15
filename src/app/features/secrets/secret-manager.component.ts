@@ -53,7 +53,7 @@ export class SecretManagerComponent {
           const location = response.headers.get('location');
           this.location.set(location);
           this.createdId.set(response.body);
-          this.uiLocation.set(`${window.location}/${this.createdId}`);
+          this.uiLocation.set(`${window.location}/${this.createdId()}`);
           this.loading.set(false);
         },
         error: (err) => {
